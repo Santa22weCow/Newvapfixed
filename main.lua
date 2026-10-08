@@ -3,6 +3,12 @@ repeat task.wait() until game:IsLoaded()
 if shared.vape then shared.vape:Uninject() end
 
 local vape
+local repository = 'https://raw.githubusercontent.com/Santa22weCow/Newvapfixed/'
+local defaultRevision = 'main'
+local function getRevision()
+	local ok, revision = pcall(readfile, 'newvape/profiles/commit.txt')
+	return ok and revision and revision ~= '' and revision or defaultRevision
+end
 local loadstring = function(...)
 	local res, err = loadstring(...)
 	if err and vape then
@@ -25,7 +31,7 @@ local playersService = cloneref(game:GetService('Players'))
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/7GrandDadPGN/VapeCompiled/'..readfile('newvape/profiles/commit.txt')..'/'..select(1, path:gsub('newvape/', '')), true)
+			return game:HttpGet(repository..getRevision()..'/'..select(1, path:gsub('newvape/', '')), true)
 		end)
 		if not suc or res == '404: Not Found' then
 			error(res)
@@ -55,9 +61,9 @@ local function finishLoading()
 			local teleportScript = [[
 				shared.vapereload = true
 				if shared.VapeDeveloper then
-					loadstring(readfile('newvape/loader.lua'), 'loader')()
+					loadstring(readfile('newvape/main.lua'), 'loader')()
 				else
-					loadstring(game:HttpGet('https://raw.githubusercontent.com/7GrandDadPGN/VapeCompiled/'..readfile('newvape/profiles/commit.txt')..'/loader.lua', true), 'loader')()
+					loadstring(game:HttpGet(repository..getRevision()..'/main.lua', true), 'loader')()
 				end
 			]]
 
@@ -82,6 +88,9 @@ local function finishLoading()
 	end
 end
 
+if not isfile('newvape/profiles/commit.txt') then
+	writefile('newvape/profiles/commit.txt', defaultRevision)
+end
 if not isfile('newvape/profiles/gui.txt') then
 	writefile('newvape/profiles/gui.txt', 'new')
 end
